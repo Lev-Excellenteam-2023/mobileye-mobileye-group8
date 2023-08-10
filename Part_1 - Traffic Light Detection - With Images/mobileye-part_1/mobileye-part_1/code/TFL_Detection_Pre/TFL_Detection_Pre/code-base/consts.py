@@ -20,10 +20,11 @@ JSON_PATH: str = 'json_path'
 X: str = 'x'
 Y: str = 'y'
 COLOR: str = 'color'
+RADIUS: str = 'radius'
 
 # Data CSV columns:
 CSV_INPUT: List[str] = [SEQ_IMAG, NAME, IMAG_PATH, JSON_PATH, GTIM_PATH]
-CSV_OUTPUT: List[str] = [SEQ_IMAG, NAME, IMAG_PATH, JSON_PATH, GTIM_PATH, X, Y, COLOR]
+CSV_OUTPUT: List[str] = [SEQ_IMAG, NAME, IMAG_PATH, JSON_PATH, GTIM_PATH, X, Y, COLOR, RADIUS]
 
 SEQ: str = 'seq'  # The image seq number -> for tracing back the original image
 IS_TRUE: str = 'is_true'  # Is it a traffic light or not.
