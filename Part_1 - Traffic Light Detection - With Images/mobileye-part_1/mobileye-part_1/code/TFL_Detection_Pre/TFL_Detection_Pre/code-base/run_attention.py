@@ -19,7 +19,7 @@ from skimage.restoration import denoise_tv_chambolle
 
 from consts import IMAG_PATH, JSON_PATH, NAME, SEQ_IMAG, X, Y, COLOR, RED, GRN, DATA_DIR, TFLS_CSV, CSV_OUTPUT, \
     SEQ, CROP_DIR, CROP_CSV_NAME, ATTENTION_RESULT, ATTENTION_CSV_NAME, ZOOM, RELEVANT_IMAGE_PATH, COL, \
-    ATTENTION_PATH, CSV_INPUT
+    ATTENTION_PATH, CSV_INPUT, RADIUS
 from misc_goodies import show_image_and_gt
 from data_utils import get_images_metadata
 from crops_creator import create_crops
@@ -107,19 +107,21 @@ def find_local_max_centers(image, binary_image, area_threshold, color):
         if region.area > area_threshold and not region_is_white(image, region):
             filtered_regions.append(region)
 
-    color_centers = []
+    color_centers, centers_radius = [], []
     for region in filtered_regions:
         if color == 'red' and region_is_red(hsv_image, region):
             color_centers.append(region.centroid)
+            centers_radius.append(region.axis_major_length)
         if color == 'green' and region_is_green(hsv_image, region):
             color_centers.append(region.centroid)
+            centers_radius.append(region.axis_major_length)
 
     # if color == 'red':
     #     helper_draw_circles(image, [c[1] for c in color_centers], [c[0] for c in color_centers], [], [])
     # if color == 'green':
     #     helper_draw_circles(image, [], [], [c[1] for c in color_centers], [c[0] for c in color_centers])
 
-    return color_centers
+    return color_centers, centers_radius
 
 
 def find_tfl_lights(c_image: np.ndarray, **kwargs) -> Dict[str, Any]:
@@ -170,7 +172,7 @@ def find_tfl_lights(c_image: np.ndarray, **kwargs) -> Dict[str, Any]:
     # green_sub = np.subtract(green_max, convolved_green)
     # plt.imshow(green_sub)
 
-    centroids = find_local_max_centers(c_image, red_binary, 9, 'red')
+    centroids, green_centers_radius = find_local_max_centers(c_image, red_binary, 9, 'red')
     x_red = []
     y_red = []
     for c in centroids:
@@ -178,7 +180,7 @@ def find_tfl_lights(c_image: np.ndarray, **kwargs) -> Dict[str, Any]:
         x_red.append(c[1])
         y_red.append(c[0])
 
-    centroids = find_local_max_centers(c_image, green_binary, 9, 'green')
+    centroids, red_centers_radius = find_local_max_centers(c_image, green_binary, 9, 'green')
     x_green = []
     y_green = []
     for c in centroids:
@@ -196,6 +198,7 @@ def find_tfl_lights(c_image: np.ndarray, **kwargs) -> Dict[str, Any]:
     return {X: x_red + x_green,
             Y: y_red + y_green,
             COLOR: [RED] * len(x_red) + [GRN] * len(x_green),
+            RADIUS: red_centers_radius + green_centers_radius,
             }
 
 
@@ -228,6 +231,7 @@ def test_find_tfl_lights(row: Series, args: Namespace) -> DataFrame:
     tfl_x: np.ndarray = attention[X].values
     tfl_y: np.ndarray = attention[Y].values
     color: np.ndarray = attention[COLOR].values
+    radius: np.ndarray = attention[RADIUS].values
     is_red = color == RED
 
     print(f"Image: {image_path}, {is_red.sum()} reds, {len(is_red) - is_red.sum()} greens..")
