@@ -86,7 +86,7 @@ def region_is_red(image, region):
     for y, x in region.coords:
         if pixel_is_red(image[y, x]):
             count_red += 1
-    return 0.25 < (count_red / region.num_pixels)
+    return 0.2 < (count_red / region.num_pixels)
 
 
 def region_is_green(image, region):
@@ -151,7 +151,7 @@ def find_tfl_lights(c_image: np.ndarray, **kwargs) -> Dict[str, Any]:
     # plt.imshow(green_max)
 
     # Apply color thresholding
-    red_binary = blur_red > 0.9
+    red_binary = blur_red > 0.6
     # plt.imshow(red_binary)
     green_binary = blur_green > 0.9
     # plt.imshow(green_binary)
@@ -172,7 +172,7 @@ def find_tfl_lights(c_image: np.ndarray, **kwargs) -> Dict[str, Any]:
     # green_sub = np.subtract(green_max, convolved_green)
     # plt.imshow(green_sub)
 
-    centroids, green_centers_radius = find_local_max_centers(c_image, red_binary, 9, 'red')
+    centroids, green_centers_radius = find_local_max_centers(c_image, (maximum_filter(r, size=15) > 0.8), 9, 'red')
     x_red = []
     y_red = []
     for c in centroids:
