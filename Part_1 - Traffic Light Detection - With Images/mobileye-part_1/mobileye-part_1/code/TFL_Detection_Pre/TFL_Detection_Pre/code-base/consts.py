@@ -41,7 +41,7 @@ RELEVANT_IMAGE_PATH: str = 'path'
 ZOOM: str = 'zoom'  # If you zoomed in the picture, then by how much? (0.5. 0.25 etc.).
 
 # CNN input CSV columns:
-CROP_RESULT: List[str] = [SEQ, IS_TRUE, IGNOR, CROP_PATH, X0, X1, Y0, Y1, COL]
+CROP_RESULT: List[str] = [SEQ, IS_TRUE, IGNOR, CROP_PATH, X0, X1, Y0, Y1, COL, ZOOM]
 ATTENTION_RESULT: List[str] = [RELEVANT_IMAGE_PATH, X, Y, ZOOM, COL]
 
 # Files path
